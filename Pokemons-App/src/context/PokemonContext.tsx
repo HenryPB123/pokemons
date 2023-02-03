@@ -16,7 +16,6 @@ interface ContextProps {
 export const PokemonContext = createContext<ContextProps>({} as ContextProps);
 
 const PokemonProvider = ({ children }: any) => {
-  //* Url Api Pokemons
   let allPokemonsUrl = "https://pokeapi.co/api/v2/pokemon?limit=10000&offset=0";
 
   const defaultState: PokeType = {
@@ -24,18 +23,16 @@ const PokemonProvider = ({ children }: any) => {
     url: allPokemonsUrl,
   };
 
-  //*------------------States---------------------------------
   const [allPokemons, setAllPokemons] = useState(null);
   const [pokemonsFiltered, setPokemonsFiltered] = useState(null);
 
   const [types, setTypes] = useState([defaultState]);
   const [filterSelected, setFilterSelected] = useState(defaultState);
 
-  //*---------------------Fetch o Axios--------------------------------
   const changeTypeSelected = async (type: PokeType) => {
     setFilterSelected(type);
 
-    const { data } = await axios(type?.url!);
+    const { data } = await axios.get(type?.url!);
     let pokemons = data?.pokemon?.map(
       ({ pokemon }: PokemonsByTypeResult) => pokemon?.url
     );
@@ -46,12 +43,12 @@ const PokemonProvider = ({ children }: any) => {
   };
 
   const getPokemonsType = async () => {
-    const { data } = await axios("https://pokeapi.co/api/v2/type");
+    const { data } = await axios.get("https://pokeapi.co/api/v2/type");
     setTypes([...types, ...data.results]);
   };
 
   const getAllPokemons = async () => {
-    const { data } = await axios(allPokemonsUrl);
+    const { data } = await axios.get(allPokemonsUrl);
 
     let pokemons = data?.results?.map(
       (pokemon: AllPokemonsResult) => pokemon?.url
@@ -62,13 +59,18 @@ const PokemonProvider = ({ children }: any) => {
   };
 
   useEffect(() => {
-    getAllPokemons();
     getPokemonsType();
+    getAllPokemons();
   }, []);
 
   return (
     <PokemonContext.Provider
-      value={{ types, filterSelected, pokemonsFiltered, changeTypeSelected }}
+      value={{
+        types,
+        filterSelected,
+        pokemonsFiltered,
+        changeTypeSelected,
+      }}
     >
       {children}
     </PokemonContext.Provider>
